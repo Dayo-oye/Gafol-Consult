@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Services | GAFOL Global Consult</title>
+  <link rel="icon" type="image/png" href="assets/images/gafol.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body { background-color: #0A192F !important; }
+    #initial-preloader {
+      position: fixed; inset: 0; z-index: 10000; background: #0A192F;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease-out;
+    }
+    .pulse-static { animation: pulseStatic 2s ease-in-out infinite; }
+    @keyframes pulseStatic {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            'navy': {
+              DEFAULT: '#0A192F',
+              light: '#112240',
+              lighter: '#233554'
+            },
+            'sky': {
+              light: '#e0f2fe',
+              DEFAULT: '#0284c7',
+              hover: '#0369a1'
+            },
+            'accent': '#38bdf8',
+          },
+          animation: {
+            'pulse-slow': 'pulseSlow 3s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseSlow: {
+              '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+              '50%': { transform: 'scale(1.05)', opacity: '0.8' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-navy text-slate-100 antialiased">
+  <div id="initial-preloader">
+    <div class="relative flex flex-col items-center">
+      <div class="absolute -inset-8 border border-sky/10 rounded-full animate-pulse opacity-20"></div>
+      <img src="assets/images/gafol.png" class="pulse-static" style="height: 100px; width: auto;" alt="Loading...">
+    </div>
+  </div>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// --- Components ---
+const IconSVG = ({ path, className = "w-6 h-6" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={path} />
+  </svg>
+);
+
+const Reveal = ({ children, direction = 'up', delay = 0, className = '' }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) entry.target.classList.add('reveal-visible');
+    }, { threshold: 0.1 });
+    if (ref.current) observer.observe(ref.current);
+    return () => { if (ref.current) observer.unobserve(ref.current); };
+  }, []);
+  const directionClass = direction === 'up' ? 'reveal-up' : direction === 'left' ? 'reveal-left' : 'reveal-right';
+  return (
+    <div ref={ref} className={`reveal-wrapper ${directionClass} ${className}`} style={{ '--delay': `${delay}ms` }}>
+      {children}
+    </div>
+  );
+};
+
+// --- Preloader Component ---
+const Preloader = () => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [shouldRender, setShouldRender] = useState(true);
+
+  useEffect(() => {
+    // Cleanup static preloader
+    const staticPreloader = document.getElementById('initial-preloader');
+    if (staticPreloader) {
+      staticPreloader.style.opacity = '0';
+      setTimeout(() => staticPreloader.remove(), 500);
+    }
+
+    const timer = setTimeout(() => setIsVisible(false), 1200);
+    const removeTimer = setTimeout(() => setShouldRender(false), 2200);
+    return () => { clearTimeout(timer); clearTimeout(removeTimer); };
+  }, []);
+
+  if (!shouldRender) return null;
+
+  return (
+    <div className={`fixed inset-0 z-[9999] bg-[#0A192F] flex items-center justify-center transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative flex flex-col items-center">
+        <div className="absolute -inset-8 border border-sky/10 rounded-full animate-ping opacity-20"></div>
+        <img src="assets/images/gafol.png" className="h-24 md:h-32 w-auto animate-pulse-slow object-contain" alt="Gafol Consult" />
+        <div className="mt-8 flex gap-1">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="w-1.5 h-1.5 bg-sky rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ServiceDetailCard = ({ title, fullDesc, icon, index }) => (
+  <Reveal direction="up" delay={index * 100}>
+    <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+      <div className="w-16 h-16 bg-sky/10 rounded-2xl flex items-center justify-center text-sky mb-6">
+        <IconSVG path={icon} className="w-8 h-8" />
+      </div>
+      <h3 className="text-2xl font-display font-bold text-navy mb-4">{title}</h3>
+      <p className="text-slate-600 leading-relaxed mb-6 font-medium">{fullDesc}</p>
+      <ul className="space-y-3">
+        {['Industry Compliance', 'Strategic Advisory', 'Performance Metrics'].map(item => (
+          <li key={item} className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="w-1.5 h-1.5 rounded-full bg-sky"></div>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Reveal>
+);
+
+const ServicesPage = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleDropdown = (name) => setActiveDropdown(prev => prev === name ? null : name);
+
+  const servicesList = [
+    { title: "Statutory Audit", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", desc: "Independent evaluation of financial statements to ensure accuracy and legal compliance." },
+    { title: "Accountancy Services", icon: "M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z", desc: "Professional bookkeeping, financial reporting, and complex ledger management." },
+    { title: "Taxation Planning", icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2", desc: "Strategic tax optimization and regulatory compliance for corporate and individual clients." },
+    { title: "Corporate Advisory", icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6", desc: "Expert guidance on mergers, acquisitions, and strategic business investments." },
+    { title: "Debt Recovery", icon: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z", desc: "Professional asset tracing and aggressive debt recovery strategies." },
+    { title: "Financial Training", icon: "M19 11H5m14 0v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2", desc: "Comprehensive capacity building and financial literacy programs for organizations." }
+  ];
+
+  return (
+    <div className="overflow-hidden">
+      <Preloader />
+      {/* Header */}
+      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-3' : 'bg-transparent py-5'}`}>
+        <div className="container-custom">
+          <div className="flex justify-between items-center text-white">
+            <a href="index.html" className="flex items-center gap-3">
+              <img src="assets/images/gafol-logo.png" className="h-12 w-auto" alt="Logo" />
+              <div className={scrolled ? 'text-navy' : 'text-white'}>
+                <h1 className="font-display font-bold">GAFOL GLOBAL</h1>
+                <p className="text-[10px] tracking-[0.2em] opacity-80">ACCOUNTANTS</p>
+              </div>
+            </a>
+            <nav className="hidden md:flex items-center gap-8 text-sm font-bold">
+              <a href="index.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Home</a>
+              <a href="about.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>About</a>
+              <a href="services.html" className="text-sky bg-sky/10 px-4 py-2 rounded-full">Services</a>
+              <a href="why-us.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Why Us</a>
+              <a href="contact.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Contact</a>
+            </nav>
+            <button className={`md:hidden p-2 ${scrolled ? 'text-navy' : 'text-white'}`} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <div className={`md:hidden absolute top-full left-0 w-full bg-white shadow-2xl transition-all duration-300 origin-top overflow-y-auto ${isMobileMenuOpen ? 'opacity-100 max-h-[800px] visible' : 'opacity-0 max-h-0 invisible pointer-events-none'}`}>
+          <div className="flex flex-col p-4 gap-2 border-t border-slate-100">
+            <a href="index.html" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">Home</a>
+            <a href="about.html" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">About Us</a>
+            
+            <div className="flex flex-col">
+              <button 
+                onClick={() => toggleDropdown('MobileServices')}
+                className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg w-full text-left"
+              >
+                Services
+                <svg className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'MobileServices' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div className={`flex flex-col overflow-hidden transition-all duration-300 ${activeDropdown === 'MobileServices' ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex flex-col pl-4 pr-4 gap-1 border-l-2 border-sky/20 ml-8 mb-2">
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Audit & Assurance</a>
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Accounting</a>
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Taxation Planning</a>
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Advisory</a>
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Recovery</a>
+                  <a href="services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Training</a>
+                </div>
+              </div>
+            </div>
+            
+            <a href="why-us.html" className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">Why Us</a>
+            
+            <div className="flex flex-col">
+              <button 
+                onClick={() => toggleDropdown('MobileContact')}
+                className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg w-full text-left"
+              >
+                Contact
+                <svg className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'MobileContact' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div className={`flex flex-col overflow-hidden transition-all duration-300 ${activeDropdown === 'MobileContact' ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex flex-col pl-4 pr-4 gap-1 border-l-2 border-sky/20 ml-8 mb-2">
+                  <a href="tel:08035364070" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">08035364070</a>
+                  <a href="mailto:gafoglobalconsult@gmail.com" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">gafoglobalconsult@gmail.com</a>
+                  <a href="contact.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Lagos Branch</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative pt-40 pb-20 bg-navy">
+        <div className="container-custom text-center text-white relative z-10">
+          <Reveal>
+            <h1 className="text-5xl lg:text-7xl font-display font-black mb-6">Our Expertise.</h1>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Precision-driven financial solutions tailored for the Nigerian economic landscape and global standards.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Services Grid */}
+      <section className="py-24 bg-white">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            {servicesList.map((s, i) => (
+              <ServiceDetailCard key={s.title} title={s.title} fullDesc={s.desc} icon={s.icon} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-sky">
+        <div className="container-custom text-center">
+          <h2 className="text-4xl font-display font-bold text-white mb-8">Need a custom financial roadmap?</h2>
+          <a href="contact.html" className="inline-flex items-center gap-3 bg-white text-sky px-10 py-5 rounded-full font-black hover:scale-105 transition-transform shadow-2xl">
+            Request a Service
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </a>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-navy py-12 text-center text-slate-500 text-xs">
+        © 2026 OLUYAMO GABRIEL & CO. Professional Excellence in Accounting.
+      </footer>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<ServicesPage />);
+  </script>
+</body>
+</html>
