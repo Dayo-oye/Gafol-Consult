@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Contact | Oluyamo Gabriel & Co</title>
+  <link rel="icon" type="image/png" href="assets/images/logo OG.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body { background-color: #0A192F !important; }
+    #initial-preloader {
+      position: fixed; inset: 0; z-index: 10000; background: #0A192F;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease-out;
+    }
+    .pulse-static { animation: pulseStatic 2s ease-in-out infinite; }
+    @keyframes pulseStatic {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            'navy': { DEFAULT: '#0A192F' },
+            'sky': { DEFAULT: '#0284c7' }
+          },
+          animation: {
+            'pulse-slow': 'pulseSlow 3s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseSlow: {
+              '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+              '50%': { transform: 'scale(1.05)', opacity: '0.8' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-navy text-slate-100 antialiased selection:bg-sky/20">
+  <div id="initial-preloader">
+    <div class="relative flex flex-col items-center">
+      <div class="absolute -inset-8 border border-sky/10 rounded-full animate-pulse opacity-20"></div>
+      <img src="assets/images/logo OG.png" class="pulse-static" style="height: 100px; width: auto;" alt="Loading...">
+    </div>
+  </div>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const Reveal = ({ children, direction = 'up', delay = 0 }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([e]) => { if(e.isIntersecting) e.target.classList.add('reveal-visible')});
+    if(ref.current) observer.observe(ref.current);
+    return () => { if(ref.current) observer.unobserve(ref.current); };
+  }, []);
+  return <div ref={ref} className={`reveal-wrapper reveal-${direction}`} style={{'--delay': `${delay}ms`}}>{children}</div>;
+};
+
+// --- Preloader Component ---
+const Preloader = () => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [shouldRender, setShouldRender] = useState(true);
+
+  useEffect(() => {
+    // Cleanup static preloader
+    const staticPreloader = document.getElementById('initial-preloader');
+    if (staticPreloader) {
+      staticPreloader.style.opacity = '0';
+      setTimeout(() => staticPreloader.remove(), 500);
+    }
+
+    const timer = setTimeout(() => setIsVisible(false), 1200);
+    const removeTimer = setTimeout(() => setShouldRender(false), 2200);
+    return () => { clearTimeout(timer); clearTimeout(removeTimer); };
+  }, []);
+
+  if (!shouldRender) return null;
+
+  return (
+    <div className={`fixed inset-0 z-[9999] bg-[#0A192F] flex items-center justify-center transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="relative flex flex-col items-center">
+        <div className="absolute -inset-8 border border-sky/10 rounded-full animate-ping opacity-20"></div>
+        <img src="assets/images/logo OG.png" className="h-24 md:h-32 w-auto animate-pulse-slow object-contain" alt="Oluyamo Gabriel & Co" />
+        <div className="mt-8 flex gap-1">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="w-1.5 h-1.5 bg-sky rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ContactPage = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleDropdown = (name) => setActiveDropdown(prev => prev === name ? null : name);
+
+  return (
+    <div className="overflow-hidden">
+      <Preloader />
+      {/* Header */}
+      <header className={`fixed top-0 w-full z-50 transition-all ${scrolled ? 'glass-nav py-3' : 'py-5'}`}>
+        <div className="container-custom flex justify-between items-center">
+            <a href="oluyamo.html" className="flex items-center gap-3">
+              <img src="assets/images/logo OG.png" className="h-10 w-auto" alt="Logo" />
+              <div className={`font-display font-bold ${scrolled ? 'text-navy' : 'text-white'}`}>OLUYAMO GABRIEL & CO</div>
+            </a>
+            <nav className="hidden md:flex items-center gap-8 text-sm font-bold">
+              <a href="index.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Home</a>
+              <a href="oluyamo-about.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>About</a>
+              <a href="oluyamo-services.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Services</a>
+              <a href="oluyamo-why-us.html" className={scrolled ? 'text-slate-600' : 'text-white/80'}>Why Us</a>
+              <a href="oluyamo-contact.html" className="text-sky bg-sky/10 px-4 py-2 rounded-full">Contact</a>
+            </nav>
+            <button className={`md:hidden p-2 ${scrolled ? 'text-navy' : 'text-white'}`} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <div className={`md:hidden absolute top-full left-0 w-full bg-white shadow-2xl transition-all duration-300 origin-top overflow-y-auto ${isMobileMenuOpen ? 'opacity-100 max-h-[800px] visible' : 'opacity-0 max-h-0 invisible pointer-events-none'}`}>
+          <div className="flex flex-col p-4 gap-2 border-t border-slate-100">
+            <a href="index.html" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">Home</a>
+            <a href="oluyamo-about.html" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">About Us</a>
+            
+            <div className="flex flex-col">
+              <button 
+                onClick={() => toggleDropdown('MobileServices')}
+                className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg w-full text-left"
+              >
+                Services
+                <svg className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'MobileServices' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div className={`flex flex-col overflow-hidden transition-all duration-300 ${activeDropdown === 'MobileServices' ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex flex-col pl-4 pr-4 gap-1 border-l-2 border-sky/20 ml-8 mb-2">
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Audit & Assurance</a>
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Accounting</a>
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Taxation Planning</a>
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Advisory</a>
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Recovery</a>
+                  <a href="oluyamo-services.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Training</a>
+                </div>
+              </div>
+            </div>
+            
+            <a href="oluyamo-why-us.html" className="px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg">Why Us</a>
+            
+            <div className="flex flex-col">
+              <button 
+                onClick={() => toggleDropdown('MobileContact')}
+                className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-sky/5 hover:text-sky rounded-lg w-full text-left"
+              >
+                Contact
+                <svg className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === 'MobileContact' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div className={`flex flex-col overflow-hidden transition-all duration-300 ${activeDropdown === 'MobileContact' ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex flex-col pl-4 pr-4 gap-1 border-l-2 border-sky/20 ml-8 mb-2">
+                  <a href="tel:08035364070" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">08035364070</a>
+                  <a href="mailto:oluyamogabrielco@gmail.com" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">oluyamogabrielco@gmail.com</a>
+                  <a href="oluyamo-contact.html" className="py-2 text-sm font-medium text-slate-600 hover:text-sky">Lagos Branch</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative pt-40 pb-20 bg-navy">
+        <div className="container-custom text-center text-white relative z-10">
+          <Reveal>
+            <h1 className="text-5xl lg:text-7xl font-display font-black mb-6">Let's Connect.</h1>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">Get in touch with our experts for professional financial assurance and advisory.</p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Contact Content */}
+      <section className="py-24 bg-white">
+        <div className="container-custom">
+           <div className="grid lg:grid-cols-2 gap-20">
+             <Reveal direction="left">
+               <div>
+                  <h2 className="text-4xl font-display font-bold text-navy mb-8">Send Us a Message.</h2>
+                  <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Message sent!'); }}>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <input type="text" placeholder="Full Name" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-sky transition-colors" />
+                      <input type="email" placeholder="Email Address" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-sky transition-colors" />
+                    </div>
+                    <input type="text" placeholder="Subject" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-sky transition-colors" />
+                    <textarea rows="6" placeholder="Your Message" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-sky transition-colors resize-none"></textarea>
+                    <button className="bg-sky text-white px-12 py-5 rounded-full font-black hover:scale-105 transition-transform shadow-xl">Send Message</button>
+                  </form>
+               </div>
+             </Reveal>
+
+             <Reveal direction="right">
+               <div className="space-y-12 lg:pl-10">
+                  <div>
+                    <h3 className="text-2xl font-display font-bold text-navy mb-6">Our Office</h3>
+                    <div className="flex items-start gap-4 text-slate-600">
+                      <div className="w-12 h-12 rounded-xl bg-sky/10 flex items-center justify-center text-sky shrink-0">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                      </div>
+                      <p className="text-lg leading-relaxed">
+                        3/5, Charity road, oko oba,<br/>abule egba, Lagos, Nigeria.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-display font-bold text-navy mb-6">Phone & Email</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 text-slate-600">
+                         <div className="w-10 h-10 rounded-lg bg-sky/5 flex items-center justify-center text-sky"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
+                         <a href="tel:08035364070" className="text-lg font-bold hover:text-sky">08035364070</a>
+                      </div>
+                      <div className="flex items-center gap-4 text-slate-600">
+                         <div className="w-10 h-10 rounded-lg bg-sky/5 flex items-center justify-center text-sky"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
+                         <a href="mailto:oluyamogabrielco@gmail.com" className="text-lg font-bold hover:text-sky">oluyamogabrielco@gmail.com</a>
+                      </div>
+                    </div>
+                  </div>
+               </div>
+             </Reveal>
+           </div>
+        </div>
+      </section>
+
+      {/* Map Placeholder */}
+      <section className="h-[400px] bg-slate-200 relative grayscale">
+         <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-display font-medium">
+            (Interactive Map Integration Area)
+         </div>
+      </section>
+
+      <footer className="py-12 bg-navy text-center text-slate-500 text-xs">
+        © 2026 OLUYAMO GABRIEL & CO. Building Value Through Assurance.
+      </footer>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<ContactPage />);
+  </script>
+</body>
+</html>
